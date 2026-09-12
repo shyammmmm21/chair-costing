@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Item Cost Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F2EA;
+    --surface:#FFFFFF;
+    --ink:#2A211A;
+    --ink-soft:#7A6C5D;
+    --line:#E6DDCD;
+
+    --frame:#8A5A2E;
+    --frame-deep:#6B4522;
+    --frame-soft:#F3E7D6;
+
+    --polish:#5C7A4E;
+    --polish-deep:#47603C;
+    --polish-soft:#E9EFE3;
+
+    --gaadi:#9C4234;
+    --gaadi-deep:#7C3128;
+    --gaadi-soft:#F3E1DC;
+
+    --total-bg:#241811;
+    --total-gold:#D8A548;
+
+    --radius:16px;
+    --radius-sm:10px;
+    --shadow:0 2px 14px rgba(42,33,26,0.08);
+    --shadow-lg:0 12px 32px rgba(36,24,17,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:70px;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces',Georgia,serif;
+    margin:0;
+    color:var(--ink);
+  }
+  ::selection{background:var(--total-gold);color:var(--total-bg);}
+
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{opacity:1;}
+
+  input, button{font-family:inherit;}
+
+  /* ---------- HEADER ---------- */
+  .site-header{
+    background:linear-gradient(135deg,var(--total-bg) 0%,#3A281B 100%);
+    padding:34px 20px 40px;
+  }
+  .header-inner{
+    max-width:1080px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .brand-mark{
+    width:52px;height:52px;flex:none;
+    border-radius:12px;
+    background:rgba(216,165,72,0.15);
+    border:1px solid rgba(216,165,72,0.35);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .brand-mark svg{width:28px;height:28px;}
+  .site-header h1{
+    color:#FBF6EC;
+    font-size:clamp(24px,4vw,32px);
+    font-weight:600;
+    letter-spacing:0.2px;
+  }
+  .site-header p{
+    color:#C9BBA6;
+    margin:4px 0 0;
+    font-size:14.5px;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .container{
+    max-width:1080px;
+    margin:-24px auto 0;
+    padding:0 16px 40px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:24px;
+  }
+
+  /* ---------- ITEM META ---------- */
+  .item-meta{
+    display:grid;
+    grid-template-columns:1.4fr 0.7fr 0.9fr;
+    gap:16px 20px;
+    align-items:end;
+  }
+  .item-meta .meta-actions{
+    grid-column:1 / -1;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:4px;
+  }
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+  }
+  .field input[type=text],
+  .field input[type=number]{
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:11px 12px;
+    font-size:15px;
+    color:var(--ink);
+    background:#FCFAF6;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    width:100%;
+  }
+  .field input:focus{
+    outline:none;
+    border-color:var(--frame);
+    box-shadow:0 0 0 3px rgba(138,90,46,0.15);
+  }
+  .field.readonly span{
+    padding:11px 0 5px;
+    font-size:15px;
+    color:var(--ink-soft);
+  }
+
+  .btn{
+    border:none;
+    border-radius:999px;
+    padding:10px 18px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .1s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-ghost{
+    background:var(--frame-soft);
+    color:var(--frame-deep);
+  }
+  .btn-ghost:hover{opacity:0.85;}
+  .btn-danger{
+    background:var(--gaadi);
+    color:#fff;
+  }
+  .btn-danger:hover{opacity:0.9;}
+  .btn-clear{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1.5px solid var(--line);
+    padding:7px 14px;
+    font-size:13px;
+  }
+  .btn-clear:hover{border-color:var(--ink-soft);}
+
+  .hint{
+    grid-column:1/-1;
+    min-height:18px;
+    font-size:13px;
+    color:var(--polish-deep);
+    margin:0;
+  }
+
+  /* ---------- CATEGORY CARDS ---------- */
+  .category-card{
+    border-top:6px solid var(--accent);
+  }
+  .category-card.frame{--accent:var(--frame);}
+  .category-card.polish{--accent:var(--polish);}
+  .category-card.gaadi{--accent:var(--gaadi);}
+
+  .category-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .category-head h2{
+    font-size:22px;
+    color:var(--accent);
+  }
+
+  .material-block{
+    padding:18px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .material-block:last-of-type{border-bottom:none;}
+  .material-block h3{
+    font-size:15.5px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+  }
+
+  .flow{
+    display:grid;
+    grid-template-columns:repeat(3,1fr) auto 1fr auto 1fr auto 1fr;
+    gap:12px;
+    align-items:end;
+  }
+  .flow-inputs{
+    display:contents;
+  }
+  .flow-arrow{
+    color:var(--line);
+    font-size:20px;
+    padding-bottom:11px;
+    text-align:center;
+    display:none;
+  }
+  .flow-out{display:flex;flex-direction:column;gap:6px;}
+  .flow-out label{
+    font-size:12.5px;font-weight:600;color:var(--ink-soft);
+    text-transform:uppercase;letter-spacing:0.4px;
+  }
+  .flow-out .qty{
+    font-variant-numeric:tabular-nums;
+    font-size:16px;font-weight:700;color:var(--accent);
+    background:var(--surface);
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:10px 12px;
+    white-space:nowrap;
+  }
+  .flow-out .qty small{font-weight:500;color:var(--ink-soft);font-size:12px;}
+  .flow-out.cost .cost-val{
+    font-variant-numeric:tabular-nums;
+    font-size:17px;font-weight:800;color:var(--ink);
+    background:var(--accent);
+    background:color-mix(in srgb, var(--accent) 12%, white);
+    border:1.5px solid var(--accent);
+    border-radius:var(--radius-sm);
+    padding:10px 12px;
+    white-space:nowrap;
+  }
+
+  .simple-fields{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+  }
+
+  .labour-other-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    padding-top:18px;
+  }
+
+  .breakdown{
+    margin-top:20px;
+    background:var(--bg);
+    border-radius:var(--radius-sm);
+    padding:16px 18px;
+  }
+  .breakdown h4{
+    font-size:13px;font-weight:700;color:var(--ink-soft);
+    text-transform:uppercase;letter-spacing:0.5px;
+    margin-bottom:10px;
+  }
+  .breakdown ul{list-style:none;margin:0;padding:0;}
+  .breakdown li{
+    display:flex;justify-content:space-between;
+    padding:5px 0;
+    font-size:14px;
+    color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+  }
+  .category-total{
+    display:flex;justify-content:space-between;align-items:center;
+    border-top:1.5px solid var(--line);
+    margin-top:8px;padding-top:10px;
+    font-family:'Fraunces',serif;
+    font-weight:700;font-size:19px;
+    color:var(--accent);
+  }
+  .category-total span:last-child{font-variant-numeric:tabular-nums;}
+
+  /* ---------- FORMULA GUIDE ---------- */
+  .formula-guide h2{font-size:20px;margin-bottom:6px;}
+  .formula-guide p.sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 16px;}
+  .formula-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:12px;
+  }
+  .formula-item{
+    background:var(--bg);
+    border-radius:var(--radius-sm);
+    padding:14px 16px;
+  }
+  .formula-item h5{
+    margin:0 0 6px;
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .formula-item code{
+    font-family:'Inter',monospace;
+    font-size:13.5px;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- SUMMARY ---------- */
+  .summary{
+    background:linear-gradient(180deg,var(--surface) 0%, #FBF8F2 100%);
+  }
+  .summary h2{font-size:22px;margin-bottom:14px;}
+  .summary table{width:100%;border-collapse:collapse;}
+  .summary td{
+    padding:10px 0;
+    font-size:15.5px;
+    border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;
+  }
+  .summary td:last-child{text-align:right;font-weight:600;}
+  .grand-total-box{
+    margin-top:18px;
+    background:var(--total-bg);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:var(--shadow-lg);
+  }
+  .grand-total-box span:first-child{
+    color:#D9CBB6;
+    font-family:'Fraunces',serif;
+    font-size:18px;
+    letter-spacing:0.3px;
+  }
+  .grand-total-box span:last-child{
+    color:var(--total-gold);
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:clamp(24px,4vw,34px);
+    font-variant-numeric:tabular-nums;
+  }
+  #cost-per-item-row{
+    margin:14px 2px 0;
+    color:var(--ink-soft);
+    font-size:14.5px;
+  }
+  #cost-per-item{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+
+  /* ---------- STICKY BAR ---------- */
+  .sticky-bar{
+    position:fixed;
+    left:0;right:0;bottom:0;
+    background:var(--total-bg);
+    color:#fff;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 20px;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.2);
+    z-index:50;
+  }
+  .sticky-bar span:first-child{
+    font-size:13px;color:#C9BBA6;text-transform:uppercase;letter-spacing:0.5px;
+  }
+  .sticky-bar span:last-child{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:20px;
+    color:var(--total-gold);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;
+    bottom:76px;right:16px;
+    background:var(--gaadi-deep);
+    color:#fff;
+    padding:11px 18px;
+    border-radius:999px;
+    font-size:13.5px;
+    box-shadow:var(--shadow-lg);
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+    z-index:100;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  /* ---------- PRINT ---------- */
+  .print-only{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    .print-only, .print-only *{visibility:visible;}
+    .print-only{
+      display:block;
+      position:absolute;top:0;left:0;width:100%;
+      padding:20px;
+      color:#000;
+      font-family:'Inter',sans-serif;
+    }
+    .print-only h1{font-size:22px;margin-bottom:2px;}
+    .print-only h2{font-size:16px;margin:18px 0 8px;border-bottom:2px solid #000;padding-bottom:4px;}
+    .print-only table{width:100%;border-collapse:collapse;margin-bottom:8px;}
+    .print-only td{padding:4px 0;font-size:13px;}
+    .print-only .p-total{font-weight:700;border-top:1px solid #000;}
+    .print-only .p-grand{font-weight:800;font-size:16px;border-top:2px solid #000;margin-top:6px;padding-top:6px;}
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:820px){
+    .item-meta{grid-template-columns:1fr 1fr;}
+    .item-meta .field.readonly{grid-column:1/-1;}
+    .flow{grid-template-columns:1fr;}
+    .flow-arrow{display:none;}
+    .labour-other-row{grid-template-columns:1fr;}
+  }
+  @media (max-width:520px){
+    .item-meta{grid-template-columns:1fr;}
+    .container{margin-top:-16px;}
+    .site-header{padding:26px 16px 32px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 20V8l8-4 8 4v12" stroke="#D8A548" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M9 20v-6h6v6" stroke="#D8A548" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Item Cost Calculator</h1>
+      <p>Calculate complete item costing quickly and accurately</p>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ITEM META -->
+  <section class="card item-meta">
+    <div class="field">
+      <label for="item-name">Item Name</label>
+      <input type="text" id="item-name" placeholder="e.g. Ferrari">
+    </div>
+    <div class="field">
+      <label for="item-qty">Item Quantity</label>
+      <input type="number" id="item-qty" min="0" step="1" placeholder="1">
+    </div>
+    <div class="field readonly">
+      <label>Date</label>
+      <span id="today-date"></span>
+    </div>
+    <div class="meta-actions">
+      <button class="btn btn-ghost" id="save-btn">Save Costing</button>
+      <button class="btn btn-ghost" id="load-btn">Load Last Costing</button>
+      <button class="btn btn-ghost" id="print-btn">Print Cost Sheet</button>
+      <button class="btn btn-danger" id="reset-btn">Reset All</button>
+    </div>
+    <p class="hint" id="save-msg"></p>
+  </section>
+
+  <!-- FRAME -->
+  <section class="card category-card frame" id="frame-card">
+    <div class="category-head">
+      <h2>Frame Costing</h2>
+      <button class="btn btn-clear" data-clear="frame">Clear Frame</button>
+    </div>
+
+    <div class="material-block">
+      <h3>Wood</h3>
+      <div class="flow">
+        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="wood-l" min="0" step="any" placeholder="0"></div>
+        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="wood-w" min="0" step="any" placeholder="0"></div>
+        <div class="field"><label>Height (inch)</label><input type="number" class="dim" id="wood-h" min="0" step="any" placeholder="0"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out"><label>Wood Quantity</label><span class="qty" id="wood-cf">0.0000 <small>cu.ft</small></span></div>
+        <div class="flow-arrow">→</div>
+        <div class="field"><label>Wood Rate (₹ / Cu.Ft.)</label><input type="number" class="rate" id="wood-rate" min="0" step="any" placeholder="0"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out cost"><label>Wood Cost</label><span class="cost-val" id="wood-cost">₹ 0.00</span></div>
+      </div>
+    </div>
+
+    <div class="material-block">
+      <h3>12mm Ply</h3>
+      <div class="flow">
+        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="ply-l" min="0" step="any" placeholder="0"></div>
+        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="ply-w" min="0" step="any" placeholder="0"></div>
+        <div class="field" style="visibility:hidden"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out"><label>Ply Area</label><span class="qty" id="ply-sf">0.00 <small>sq.ft</small></span></div>
+        <div class="flow-arrow">→</div>
+        <div class="field"><label>Ply Rate (₹ / Sq.Ft.)</label><input type="number" class="rate" id="ply-rate" min="0" step="any" placeholder="0"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out cost"><label>Ply Cost</label><span class="cost-val" id="ply-cost">₹ 0.00</span></div>
+      </div>
+    </div>
+
+    <div class="material-block">
+      <h3>Flexi Ply</h3>
+      <div class="flow">
+        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="flexi-l" min="0" step="any" placeholder="0"></div>
+        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="flexi-w" min="0" step="any" placeholder="0"></div>
+        <div class="field" style="visibility:hidden"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out"><label>Flexi Ply Area</label><span class="qty" id="flexi-sf">0.00 <small>sq.ft</small></span></div>
+        <div class="flow-arrow">→</div>
+        <div class="field"><label>Flexi Ply Rate (₹ / Sq.Ft.)</label><input type="number" class="rate" id="flexi-rate" min="0" step="any" placeholder="0"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out cost"><label>Flexi Ply Cost</label><span class="cost-val" id="flexi-cost">₹ 0.00</span></div>
+      </div>
+    </div>
+
+    <div class="labour-other-row">
+      <div class="field"><label>Frame Labour Cost (₹)</label><input type="number" class="rate" id="frame-labour" min="0" step="any" placeholder="0"></div>
+      <div class="field"><label>Frame Other Cost (₹)</label><input type="number" class="rate" id="frame-other" min="0" step="any" placeholder="0"></div>
+    </div>
+
+    <div class="breakdown">
+      <h4>Frame Cost Breakdown</h4>
+      <ul>
+        <li><span>Wood</span><span id="bd-wood">₹ 0.00</span></li>
+        <li><span>12mm Ply</span><span id="bd-ply">₹ 0.00</span></li>
+        <li><span>Flexi Ply</span><span id="bd-flexi">₹ 0.00</span></li>
+        <li><span>Labour</span><span id="bd-frame-labour">₹ 0.00</span></li>
+        <li><span>Other</span><span id="bd-frame-other">₹ 0.00</span></li>
+      </ul>
+      <div class="category-total"><span>Frame Total</span><span id="frame-total">₹ 0.00</span></div>
+    </div>
+  </section>
+
+  <!-- POLISH -->
+  <section class="card category-card polish" id="polish-card">
+    <div class="category-head">
+      <h2>Polish Costing</h2>
+      <button class="btn btn-clear" data-clear="polish">Clear Polish</button>
+    </div>
+
+    <div class="simple-fields">
+      <div class="field"><label>Polish Goods Cost (₹)</label><input type="number" class="rate" id="polish-goods" min="0" step="any" placeholder="0"></div>
+      <div class="field"><label>Polish Labour Cost (₹)</label><input type="number" class="rate" id="polish-labour" min="0" step="any" placeholder="0"></div>
+      <div class="field"><label>Polish Other Cost (₹)</label><input type="number" class="rate" id="polish-other" min="0" step="any" placeholder="0"></div>
+    </div>
+
+    <div class="breakdown">
+      <h4>Polish Cost Breakdown</h4>
+      <ul>
+        <li><span>Polish Goods</span><span id="bd-polish-goods">₹ 0.00</span></li>
+        <li><span>Labour</span><span id="bd-polish-labour">₹ 0.00</span></li>
+        <li><span>Other</span><span id="bd-polish-other">₹ 0.00</span></li>
+      </ul>
+      <div class="category-total"><span>Polish Total</span><span id="polish-total">₹ 0.00</span></div>
+    </div>
+  </section>
+
+  <!-- GAADI WORK -->
+  <section class="card category-card gaadi" id="gaadi-card">
+    <div class="category-head">
+      <h2>Gaadi Work Costing</h2>
+      <button class="btn btn-clear" data-clear="gaadi">Clear Gaadi Work</button>
+    </div>
+
+    <div class="material-block">
+      <h3>Foam 1 <span style="text-transform:none;font-weight:400;">(optional)</span></h3>
+      <div class="flow">
+        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="foam1-l" min="0" step="any" placeholder="0"></div>
+        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="foam1-w" min="0" step="any" placeholder="0"></div>
+        <div class="field" style="visibility:hidden"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out"><label>Foam 1 Area</label><span class="qty" id="foam1-sf">0.00 <small>sq.ft</small></span></div>
+        <div class="flow-arrow">→</div>
+        <div class="field"><label>Foam 1 Rate (₹ / Sq.Ft.)</label><input type="number" class="rate" id="foam1-rate" min="0" step="any" placeholder="0"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out cost"><label>Foam 1 Cost</label><span class="cost-val" id="foam1-cost">₹ 0.00</span></div>
+      </div>
+    </div>
+
+    <div class="material-block">
+      <h3>Foam 2 <span style="text-transform:none;font-weight:400;">(optional)</span></h3>
+      <div class="flow">
+        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="foam2-l" min="0" step="any" placeholder="0"></div>
+        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="foam2-w" min="0" step="any" placeholder="0"></div>
+        <div class="field" style="visibility:hidden"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out"><label>Foam 2 Area</label><span class="qty" id="foam2-sf">0.00 <small>sq.ft</small></span></div>
+        <div class="flow-arrow">→</div>
+        <div class="field"><label>Foam 2 Rate (₹ / Sq.Ft.)</label><input type="number" class="rate" id="foam2-rate" min="0" step="any" placeholder="0"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out cost"><label>Foam 2 Cost</label><span class="cost-val" id="foam2-cost">₹ 0.00</span></div>
+      </div>
+    </div>
+
+    <div class="material-block">
+      <h3>Kapda / Fabric</h3>
+      <div class="flow">
+        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="kapda-l" min="0" step="any" placeholder="0"></div>
+        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="kapda-w" min="0" step="any" placeholder="0"></div>
+        <div class="field" style="visibility:hidden"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out"><label>Kapda Area</label><span class="qty" id="kapda-sf">0.00 <small>sq.ft</small></span></div>
+        <div class="flow-arrow">→</div>
+        <div class="field"><label>Kapda Rate (₹ / Sq.Ft.)</label><input type="number" class="rate" id="kapda-rate" min="0" step="any" placeholder="0"></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-out cost"><label>Kapda Cost</label><span class="cost-val" id="kapda-cost">₹ 0.00</span></div>
+      </div>
+    </div>
+
+    <div class="labour-other-row">
+      <div class="field"><label>Gaadi Labour Cost (₹)</label><input type="number" class="rate" id="gaadi-labour" min="0" step="any" placeholder="0"></div>
+      <div class="field"><label>Gaadi Other Cost (₹)</label><input type="number" class="rate" id="gaadi-other" min="0" step="any" placeholder="0"></div>
+    </div>
+
+    <div class="breakdown">
+      <h4>Gaadi Work Cost Breakdown</h4>
+      <ul>
+        <li><span>Foam 1</span><span id="bd-foam1">₹ 0.00</span></li>
+        <li><span>Foam 2</span><span id="bd-foam2">₹ 0.00</span></li>
+        <li><span>Kapda</span><span id="bd-kapda">₹ 0.00</span></li>
+        <li><span>Labour</span><span id="bd-gaadi-labour">₹ 0.00</span></li>
+        <li><span>Other</span><span id="bd-gaadi-other">₹ 0.00</span></li>
+      </ul>
+      <div class="category-total"><span>Gaadi Work Total</span><span id="gaadi-total">₹ 0.00</span></div>
+    </div>
+  </section>
+
+  <!-- FORMULA GUIDE -->
+  <section class="card formula-guide">
+    <h2>How Cost Is Calculated</h2>
+    <p class="sub">A quick reference so every number on this page can be verified by hand.</p>
+    <div class="formula-grid">
+      <div class="formula-item"><h5>Wood</h5><code>(L × W × H) ÷ 1728 = Cubic Feet</code></div>
+      <div class="formula-item"><h5>Ply / Flexi Ply</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
+      <div class="formula-item"><h5>Foam 1 / Foam 2</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
+      <div class="formula-item"><h5>Kapda</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
+      <div class="formula-item"><h5>Category Total</h5><code>Material Costs + Labour + Other</code></div>
+      <div class="formula-item"><h5>Grand Total</h5><code>Frame + Polish + Gaadi Work</code></div>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="card summary">
+    <h2>Cost Summary</h2>
+    <table>
+      <tr><td>Frame Cost</td><td id="sum-frame">₹ 0.00</td></tr>
+      <tr><td>Polish Cost</td><td id="sum-polish">₹ 0.00</td></tr>
+      <tr><td>Gaadi Work Cost</td><td id="sum-gaadi">₹ 0.00</td></tr>
+    </table>
+    <div class="grand-total-box">
+      <span>Grand Total</span>
+      <span id="grand-total">₹ 0.00</span>
+    </div>
+    <p id="cost-per-item-row">Cost Per Item: <span id="cost-per-item">—</span></p>
+  </section>
+
+</main>
+
+<div class="sticky-bar">
+  <span>Grand Total</span>
+  <span id="sticky-total">₹ 0.00</span>
+</div>
+
+<div class="toast" id="toast">Negative values aren't allowed — adjusted to 0.</div>
+
+<div class="print-only" id="print-sheet"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- HELPERS ---------------- */
+
+  function formatCurrency(n){
+    if(!isFinite(n)) n = 0;
+    return "₹ " + n.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function formatQty(n, decimals){
+    if(!isFinite(n)) n = 0;
+    return n.toFixed(decimals);
+  }
+
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast(msg){
+    toastEl.textContent = msg || "Negative values aren't allowed — adjusted to 0.";
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+  }
+
+  // Reads a numeric input by id. Empty -> 0. Negative -> clamps to 0 and warns.
+  function num(id){
+    var el = document.getElementById(id);
+    if(!el) return 0;
+    var raw = el.value;
+    if(raw === "" || raw === null){ return 0; }
+    var v = parseFloat(raw);
+    if(isNaN(v)){
+      return 0;
+    }
+    if(v < 0){
+      el.value = 0;
+      showToast();
+      return 0;
+    }
+    return v;
+  }
+
+  function setText(id, text){
+    var el = document.getElementById(id);
+    if(el) el.textContent = text;
+  }
+
+  /* ---------------- CALCULATIONS ---------------- */
+
+  function calculateWood(){
+    var l = num('wood-l'), w = num('wood-w'), h = num('wood-h'), rate = num('wood-rate');
+    var cubicFeet = (l * w * h) / 1728;
+    var cost = cubicFeet * rate;
+    return { cubicFeet: cubicFeet, cost: cost };
+  }
+
+  function calculatePly(){
+    var l = num('ply-l'), w = num('ply-w'), rate = num('ply-rate');
+    var sqFeet = (l * w) / 144;
+    var cost = sqFeet * rate;
+    return { sqFeet: sqFeet, cost: cost };
+  }
+
+  function calculateFlexiPly(){
+    var l = num('flexi-l'), w = num('flexi-w'), rate = num('flexi-rate');
+    var sqFeet = (l * w) / 144;
+    var cost = sqFeet * rate;
+    return { sqFeet: sqFeet, cost: cost };
+  }
+
+  function calculateFoam1(){
+    var l = num('foam1-l'), w = num('foam1-w'), rate = num('foam1-rate');
+    var sqFeet = (l * w) / 144;
+    var cost = sqFeet * rate;
+    return { sqFeet: sqFeet, cost: cost };
+  }
+
+  function calculateFoam2(){
+    var l = num('foam2-l'), w = num('foam2-w'), rate = num('foam2-rate');
+    var sqFeet = (l * w) / 144;
+    var cost = sqFeet * rate;
+    return { sqFeet: sqFeet, cost: cost };
+  }
+
+  function calculateKapda(){
+    var l = num('kapda-l'), w = num('kapda-w'), rate = num('kapda-rate');
+    var sqFeet = (l * w) / 144;
+    var cost = sqFeet * rate;
+    return { sqFeet: sqFeet, cost: cost };
+  }
+
+  function calculateFrameTotal(wood, ply, flexi){
+    var labour = num('frame-labour');
+    var other = num('frame-other');
+    var total = wood.cost + ply.cost + flexi.cost + labour + other;
+    return { total: total, labour: labour, other: other };
+  }
+
+  function calculatePolishTotal(){
+    var goods = num('polish-goods');
+    var labour = num('polish-labour');
+    var other = num('polish-other');
+    var total = goods + labour + other;
+    return { total: total, goods: goods, labour: labour, other: other };
+  }
+
+  function calculateGaadiTotal(foam1, foam2, kapda){
+    var labour = num('gaadi-labour');
+    var other = num('gaadi-other');
+    var total = foam1.cost + foam2.cost + kapda.cost + labour + other;
+    return { total: total, labour: labour, other: other };
+  }
+
+  function calculateGrandTotal(frameTotal, polishTotal, gaadiTotal){
+    return frameTotal + polishTotal + gaadiTotal;
+  }
+
+  /* ---------------- RENDER / MAIN LOOP ---------------- */
+
+  var lastResult = null;
+
+  function recalcAndRender(){
+    var wood = calculateWood();
+    var ply = calculatePly();
+    var flexi = calculateFlexiPly();
+    var frame = calculateFrameTotal(wood, ply, flexi);
+
+    var polish = calculatePolishTotal();
+
+    var foam1 = calculateFoam1();
+    var foam2 = calculateFoam2();
+    var kapda = calculateKapda();
+    var gaadi = calculateGaadiTotal(foam1, foam2, kapda);
+
+    var grandTotal = calculateGrandTotal(frame.total, polish.total, gaadi.total);
+
+    // Frame display
+    setText('wood-cf', formatQty(wood.cubicFeet, 4) + ' \u00A0cu.ft');
+    setText('wood-cost', formatCurrency(wood.cost));
+    setText('ply-sf', formatQty(ply.sqFeet, 2) + ' \u00A0sq.ft');
+    setText('ply-cost', formatCurrency(ply.cost));
+    setText('flexi-sf', formatQty(flexi.sqFeet, 2) + ' \u00A0sq.ft');
+    setText('flexi-cost', formatCurrency(flexi.cost));
+    setText('bd-wood', formatCurrency(wood.cost));
+    setText('bd-ply', formatCurrency(ply.cost));
+    setText('bd-flexi', formatCurrency(flexi.cost));
+    setText('bd-frame-labour', formatCurrency(frame.labour));
+    setText('bd-frame-other', formatCurrency(frame.other));
+    setText('frame-total', formatCurrency(frame.total));
+
+    // Polish display
+    setText('bd-polish-goods', formatCurrency(polish.goods));
+    setText('bd-polish-labour', formatCurrency(polish.labour));
+    setText('bd-polish-other', formatCurrency(polish.other));
+    setText('polish-total', formatCurrency(polish.total));
+
+    // Gaadi display
+    setText('foam1-sf', formatQty(foam1.sqFeet, 2) + ' \u00A0sq.ft');
+    setText('foam1-cost', formatCurrency(foam1.cost));
+    setText('foam2-sf', formatQty(foam2.sqFeet, 2) + ' \u00A0sq.ft');
+    setText('foam2-cost', formatCurrency(foam2.cost));
+    setText('kapda-sf', formatQty(kapda.sqFeet, 2) + ' \u00A0sq.ft');
+    setText('kapda-cost', formatCurrency(kapda.cost));
+    setText('bd-foam1', formatCurrency(foam1.cost));
+    setText('bd-foam2', formatCurrency(foam2.cost));
+    setText('bd-kapda', formatCurrency(kapda.cost));
+    setText('bd-gaadi-labour', formatCurrency(gaadi.labour));
+    setText('bd-gaadi-other', formatCurrency(gaadi.other));
+    setText('gaadi-total', formatCurrency(gaadi.total));
+
+    // Summary
+    setText('sum-frame', formatCurrency(frame.total));
+    setText('sum-polish', formatCurrency(polish.total));
+    setText('sum-gaadi', formatCurrency(gaadi.total));
+    setText('grand-total', formatCurrency(grandTotal));
+    setText('sticky-total', formatCurrency(grandTotal));
+
+    // Cost per item
+    var qtyEl = document.getElementById('item-qty');
+    var qty = parseFloat(qtyEl.value);
+    var costPerItemText = '—';
+    if(!isNaN(qty) && qty > 0){
+      costPerItemText = formatCurrency(grandTotal / qty);
+    }
+    setText('cost-per-item', costPerItemText);
+
+    lastResult = {
+      wood: wood, ply: ply, flexi: flexi, frame: frame,
+      polish: polish,
+      foam1: foam1, foam2: foam2, kapda: kapda, gaadi: gaadi,
+      grandTotal: grandTotal
+    };
+  }
+
+  /* ---------------- EVENTS ---------------- */
+
+  document.addEventListener('input', function(e){
+    if(e.target.tagName === 'INPUT'){
+      recalcAndRender();
+    }
+  });
+
+  var ALL_FIELD_IDS = [
+    'item-name','item-qty',
+    'wood-l','wood-w','wood-h','wood-rate',
+    'ply-l','ply-w','ply-rate',
+    'flexi-l','flexi-w','flexi-rate',
+    'frame-labour','frame-other',
+    'polish-goods','polish-labour','polish-other',
+    'foam1-l','foam1-w','foam1-rate',
+    'foam2-l','foam2-w','foam2-rate',
+    'kapda-l','kapda-w','kapda-rate',
+    'gaadi-labour','gaadi-other'
+  ];
+
+  var CATEGORY_FIELDS = {
+    frame: ['wood-l','wood-w','wood-h','wood-rate','ply-l','ply-w','ply-rate','flexi-l','flexi-w','flexi-rate','frame-labour','frame-other'],
+    polish: ['polish-goods','polish-labour','polish-other'],
+    gaadi: ['foam1-l','foam1-w','foam1-rate','foam2-l','foam2-w','foam2-rate','kapda-l','kapda-w','kapda-rate','gaadi-labour','gaadi-other']
+  };
+
+  document.querySelectorAll('[data-clear]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var cat = btn.getAttribute('data-clear');
+      (CATEGORY_FIELDS[cat] || []).forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.value = '';
+      });
+      recalcAndRender();
+    });
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    var ok = window.confirm('Are you sure you want to reset all costing data?');
+    if(!ok) return;
+    ALL_FIELD_IDS.forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.value = '';
+    });
+    recalcAndRender();
+    setText('save-msg', '');
+  });
+
+  /* ---------------- SAVE / LOAD ---------------- */
+
+  var STORAGE_KEY = 'itemCostCalculatorData_v1';
+
+  document.getElementById('save-btn').addEventListener('click', function(){
+    var data = {};
+    ALL_FIELD_IDS.forEach(function(id){
+      var el = document.getElementById(id);
+      data[id] = el ? el.value : '';
+    });
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setText('save-msg', 'Costing saved on this device.');
+    }catch(err){
+      setText('save-msg', 'Could not save — your browser storage may be unavailable.');
+    }
+  });
+
+  document.getElementById('load-btn').addEventListener('click', function(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw){
+        setText('save-msg', 'No saved costing found on this device.');
+        return;
+      }
+      var data = JSON.parse(raw);
+      ALL_FIELD_IDS.forEach(function(id){
+        if(Object.prototype.hasOwnProperty.call(data, id)){
+          var el = document.getElementById(id);
+          if(el) el.value = data[id];
+        }
+      });
+      recalcAndRender();
+      setText('save-msg', 'Last saved costing loaded.');
+    }catch(err){
+      setText('save-msg', 'Could not load saved costing.');
+    }
+  });
+
+  /* ---------------- PRINT ---------------- */
+
+  function val(id){
+    var el = document.getElementById(id);
+    return el ? el.value : '';
+  }
+
+  document.getElementById('print-btn').addEventListener('click', function(){
+    if(!lastResult) recalcAndRender();
+    var r = lastResult;
+    var name = val('item-name') || '—';
+    var qty = val('item-qty') || '—';
+    var dateStr = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
+
+    var costPerItem = '—';
+    var qn = parseFloat(val('item-qty'));
+    if(!isNaN(qn) && qn > 0){ costPerItem = formatCurrency(r.grandTotal / qn); }
+
+    var html = '';
+    html += '<h1>Item Cost Calculator</h1>';
+    html += '<table><tr><td><strong>Item Name:</strong> ' + escapeHtml(name) + '</td><td style="text-align:right;"><strong>Date:</strong> ' + dateStr + '</td></tr>';
+    html += '<tr><td><strong>Quantity:</strong> ' + escapeHtml(qty) + '</td><td style="text-align:right;"><strong>Cost Per Item:</strong> ' + costPerItem + '</td></tr></table>';
+
+    html += '<h2>Frame Costing</h2><table>';
+    html += row('Wood — Dimensions (in)', val('wood-l')+' x '+val('wood-w')+' x '+val('wood-h'));
+    html += row('Wood — Cubic Feet', formatQty(r.wood.cubicFeet,4));
+    html += row('Wood — Rate (₹/cu.ft)', val('wood-rate') || '0');
+    html += row('Wood — Cost', formatCurrency(r.wood.cost));
+    html += row('12mm Ply — Dimensions (in)', val('ply-l')+' x '+val('ply-w'));
+    html += row('12mm Ply — Area (sq.ft)', formatQty(r.ply.sqFeet,2));
+    html += row('12mm Ply — Rate (₹/sq.ft)', val('ply-rate') || '0');
+    html += row('12mm Ply — Cost', formatCurrency(r.ply.cost));
+    html += row('Flexi Ply — Dimensions (in)', val('flexi-l')+' x '+val('flexi-w'));
+    html += row('Flexi Ply — Area (sq.ft)', formatQty(r.flexi.sqFeet,2));
+    html += row('Flexi Ply — Rate (₹/sq.ft)', val('flexi-rate') || '0');
+    html += row('Flexi Ply — Cost', formatCurrency(r.flexi.cost));
+    html += row('Labour', formatCurrency(r.frame.labour));
+    html += row('Other', formatCurrency(r.frame.other));
+    html += row('Frame Total', formatCurrency(r.frame.total), true);
+    html += '</table>';
+
+    html += '<h2>Polish Costing</h2><table>';
+    html += row('Polish Goods Cost', formatCurrency(r.polish.goods));
+    html += row('Labour', formatCurrency(r.polish.labour));
+    html += row('Other', formatCurrency(r.polish.other));
+    html += row('Polish Total', formatCurrency(r.polish.total), true);
+    html += '</table>';
+
+    html += '<h2>Gaadi Work Costing</h2><table>';
+    var foam1Used = (parseFloat(val('foam1-l'))||0) > 0 || (parseFloat(val('foam1-w'))||0) > 0;
+    var foam2Used = (parseFloat(val('foam2-l'))||0) > 0 || (parseFloat(val('foam2-w'))||0) > 0;
+    html += row('Foam 1 — Dimensions (in)', foam1Used ? (val('foam1-l')+' x '+val('foam1-w')) : 'Not Used');
+    html += row('Foam 1 — Area (sq.ft)', formatQty(r.foam1.sqFeet,2));
+    html += row('Foam 1 — Rate (₹/sq.ft)', val('foam1-rate') || '0');
+    html += row('Foam 1 — Cost', formatCurrency(r.foam1.cost));
+    html += row('Foam 2 — Dimensions (in)', foam2Used ? (val('foam2-l')+' x '+val('foam2-w')) : 'Not Used');
+    html += row('Foam 2 — Area (sq.ft)', formatQty(r.foam2.sqFeet,2));
+    html += row('Foam 2 — Rate (₹/sq.ft)', val('foam2-rate') || '0');
+    html += row('Foam 2 — Cost', formatCurrency(r.foam2.cost));
+    html += row('Kapda — Dimensions (in)', val('kapda-l')+' x '+val('kapda-w'));
+    html += row('Kapda — Area (sq.ft)', formatQty(r.kapda.sqFeet,2));
+    html += row('Kapda — Rate (₹/sq.ft)', val('kapda-rate') || '0');
+    html += row('Kapda — Cost', formatCurrency(r.kapda.cost));
+    html += row('Labour', formatCurrency(r.gaadi.labour));
+    html += row('Other', formatCurrency(r.gaadi.other));
+    html += row('Gaadi Work Total', formatCurrency(r.gaadi.total), true);
+    html += '</table>';
+
+    html += '<h2>Final Cost Summary</h2><table>';
+    html += row('Frame', formatCurrency(r.frame.total));
+    html += row('Polish', formatCurrency(r.polish.total));
+    html += row('Gaadi Work', formatCurrency(r.gaadi.total));
+    html += '<tr class="p-grand"><td>GRAND TOTAL</td><td style="text-align:right;">' + formatCurrency(r.grandTotal) + '</td></tr>';
+    html += '</table>';
+
+    document.getElementById('print-sheet').innerHTML = html;
+    window.print();
+  });
+
+  function row(label, value, isTotal){
+    var cls = isTotal ? ' class="p-total"' : '';
+    return '<tr' + cls + '><td>' + escapeHtml(label) + '</td><td style="text-align:right;">' + value + '</td></tr>';
+  }
+
+  function escapeHtml(str){
+    str = String(str);
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ---------------- INIT ---------------- */
+
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
+  recalcAndRender();
+
+})();
+</script>
+</body>
+</html>

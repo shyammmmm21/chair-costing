@@ -220,6 +220,83 @@
     margin-bottom:14px;
   }
 
+  .material-block-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .material-block-head h3{margin-bottom:0;}
+  .btn-add{
+    background:transparent;
+    color:var(--accent);
+    border:1.5px dashed var(--accent);
+    border-radius:999px;
+    padding:7px 16px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn-add:hover{background:var(--frame-soft);}
+
+  .wood-row{
+    background:var(--bg);
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+  .wood-row-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  .wood-row-label{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--frame-deep);
+  }
+  .wood-row-remove{
+    background:transparent;
+    border:1.5px solid var(--line);
+    color:var(--ink-soft);
+    width:26px;height:26px;
+    border-radius:50%;
+    font-size:13px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .wood-row-remove:hover{border-color:var(--gaadi);color:var(--gaadi);}
+  .wood-row-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr) repeat(3,1fr);
+    gap:12px;
+    align-items:end;
+  }
+  .wood-row-grid .field input{background:#FFFFFF;}
+  .wood-empty{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13.5px;
+    padding:18px 10px;
+    border:1.5px dashed var(--line);
+    border-radius:var(--radius-sm);
+    margin-bottom:12px;
+  }
+  .material-subtotal{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 4px 0;
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--frame-deep);
+  }
+  .material-subtotal span:last-child{font-variant-numeric:tabular-nums;}
+
   .flow{
     display:grid;
     grid-template-columns:repeat(3,1fr) auto 1fr auto 1fr auto 1fr;
@@ -444,6 +521,7 @@
     .flow{grid-template-columns:1fr;}
     .flow-arrow{display:none;}
     .labour-other-row{grid-template-columns:1fr;}
+    .wood-row-grid{grid-template-columns:1fr 1fr;}
   }
   @media (max-width:520px){
     .item-meta{grid-template-columns:1fr;}
@@ -475,7 +553,7 @@
   <section class="card item-meta">
     <div class="field">
       <label for="item-name">Item Name</label>
-      <input type="text" id="item-name" placeholder="e.g. Ferrari">
+      <input type="text" id="item-name" placeholder="e.g. Sofa Set – 3 Seater">
     </div>
     <div class="field">
       <label for="item-qty">Item Quantity</label>
@@ -502,17 +580,16 @@
     </div>
 
     <div class="material-block">
-      <h3>Wood</h3>
-      <div class="flow">
-        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="wood-l" min="0" step="any" placeholder="0"></div>
-        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="wood-w" min="0" step="any" placeholder="0"></div>
-        <div class="field"><label>Height (inch)</label><input type="number" class="dim" id="wood-h" min="0" step="any" placeholder="0"></div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-out"><label>Wood Quantity</label><span class="qty" id="wood-cf">0.0000 <small>cu.ft</small></span></div>
-        <div class="flow-arrow">→</div>
-        <div class="field"><label>Wood Rate (₹ / Cu.Ft.)</label><input type="number" class="rate" id="wood-rate" min="0" step="any" placeholder="0"></div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-out cost"><label>Wood Cost</label><span class="cost-val" id="wood-cost">₹ 0.00</span></div>
+      <div class="material-block-head">
+        <h3>Wood</h3>
+        <button type="button" class="btn-add" id="add-wood-btn">+ Add Wood</button>
+      </div>
+      <p style="margin:-6px 0 14px;font-size:13px;color:var(--ink-soft);">Add one entry per wood size you use — e.g. a frame wood used once and a leg wood used in 4 pieces. Each entry has its own dimensions, number of pieces and rate.</p>
+      <div id="wood-empty" class="wood-empty" style="display:none;">No wood entries yet. Click "+ Add Wood" to add one.</div>
+      <div id="wood-rows"></div>
+      <div class="material-subtotal">
+        <span>Wood Subtotal</span>
+        <span id="wood-subtotal">₹ 0.00</span>
       </div>
     </div>
 
@@ -596,32 +673,16 @@
     </div>
 
     <div class="material-block">
-      <h3>Foam 1 <span style="text-transform:none;font-weight:400;">(optional)</span></h3>
-      <div class="flow">
-        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="foam1-l" min="0" step="any" placeholder="0"></div>
-        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="foam1-w" min="0" step="any" placeholder="0"></div>
-        <div class="field" style="visibility:hidden"></div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-out"><label>Foam 1 Area</label><span class="qty" id="foam1-sf">0.00 <small>sq.ft</small></span></div>
-        <div class="flow-arrow">→</div>
-        <div class="field"><label>Foam 1 Rate (₹ / Sq.Ft.)</label><input type="number" class="rate" id="foam1-rate" min="0" step="any" placeholder="0"></div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-out cost"><label>Foam 1 Cost</label><span class="cost-val" id="foam1-cost">₹ 0.00</span></div>
+      <div class="material-block-head">
+        <h3>Foam</h3>
+        <button type="button" class="btn-add" id="add-foam-btn">+ Add Foam</button>
       </div>
-    </div>
-
-    <div class="material-block">
-      <h3>Foam 2 <span style="text-transform:none;font-weight:400;">(optional)</span></h3>
-      <div class="flow">
-        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="foam2-l" min="0" step="any" placeholder="0"></div>
-        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="foam2-w" min="0" step="any" placeholder="0"></div>
-        <div class="field" style="visibility:hidden"></div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-out"><label>Foam 2 Area</label><span class="qty" id="foam2-sf">0.00 <small>sq.ft</small></span></div>
-        <div class="flow-arrow">→</div>
-        <div class="field"><label>Foam 2 Rate (₹ / Sq.Ft.)</label><input type="number" class="rate" id="foam2-rate" min="0" step="any" placeholder="0"></div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-out cost"><label>Foam 2 Cost</label><span class="cost-val" id="foam2-cost">₹ 0.00</span></div>
+      <p style="margin:-6px 0 14px;font-size:13px;color:var(--ink-soft);">Add one entry per foam size you use. Each entry has its own dimensions, number of pieces and rate. Leave it empty if no foam is used.</p>
+      <div id="foam-empty" class="wood-empty" style="display:none;">No foam entries yet. Click "+ Add Foam" to add one.</div>
+      <div id="foam-rows"></div>
+      <div class="material-subtotal">
+        <span>Foam Subtotal</span>
+        <span id="foam-subtotal">₹ 0.00</span>
       </div>
     </div>
 
@@ -648,8 +709,7 @@
     <div class="breakdown">
       <h4>Gaadi Work Cost Breakdown</h4>
       <ul>
-        <li><span>Foam 1</span><span id="bd-foam1">₹ 0.00</span></li>
-        <li><span>Foam 2</span><span id="bd-foam2">₹ 0.00</span></li>
+        <li><span>Foam</span><span id="bd-foam">₹ 0.00</span></li>
         <li><span>Kapda</span><span id="bd-kapda">₹ 0.00</span></li>
         <li><span>Labour</span><span id="bd-gaadi-labour">₹ 0.00</span></li>
         <li><span>Other</span><span id="bd-gaadi-other">₹ 0.00</span></li>
@@ -665,7 +725,7 @@
     <div class="formula-grid">
       <div class="formula-item"><h5>Wood</h5><code>(L × W × H) ÷ 1728 = Cubic Feet</code></div>
       <div class="formula-item"><h5>Ply / Flexi Ply</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
-      <div class="formula-item"><h5>Foam 1 / Foam 2</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
+      <div class="formula-item"><h5>Foam (each entry)</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
       <div class="formula-item"><h5>Kapda</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
       <div class="formula-item"><h5>Category Total</h5><code>Material Costs + Labour + Other</code></div>
       <div class="formula-item"><h5>Grand Total</h5><code>Frame + Polish + Gaadi Work</code></div>
@@ -723,9 +783,8 @@
     toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
   }
 
-  // Reads a numeric input by id. Empty -> 0. Negative -> clamps to 0 and warns.
-  function num(id){
-    var el = document.getElementById(id);
+  // Reads a numeric value from an input element. Empty -> 0. Negative -> clamps to 0 and warns.
+  function numFromEl(el){
     if(!el) return 0;
     var raw = el.value;
     if(raw === "" || raw === null){ return 0; }
@@ -741,18 +800,239 @@
     return v;
   }
 
+  // Reads a numeric input by id. Empty -> 0. Negative -> clamps to 0 and warns.
+  function num(id){
+    return numFromEl(document.getElementById(id));
+  }
+
+  // Reads a "pieces" style input from within a row. Empty -> defaults to 1 piece. Negative -> clamps to 0.
+  function rowPieces(row, selector){
+    var el = row.querySelector(selector);
+    if(!el) return 1;
+    var raw = el.value;
+    if(raw === "" || raw === null){ return 1; }
+    var v = parseFloat(raw);
+    if(isNaN(v)) return 1;
+    if(v < 0){
+      el.value = 0;
+      showToast();
+      return 0;
+    }
+    return v;
+  }
+
+  // Reads a numeric field from within a row by selector.
+  function rowNum(row, selector){
+    return numFromEl(row.querySelector(selector));
+  }
+
+  function setRowText(row, selector, text){
+    var el = row.querySelector(selector);
+    if(el) el.textContent = text;
+  }
+
   function setText(id, text){
     var el = document.getElementById(id);
     if(el) el.textContent = text;
   }
 
+  /* ---------------- DYNAMIC WOOD ROWS ---------------- */
+
+  var woodRowsContainer = document.getElementById('wood-rows');
+  var woodEmptyEl = document.getElementById('wood-empty');
+  var woodRowCounter = 0;
+
+  function woodRowTemplate(data){
+    data = data || {};
+    return (
+      '<div class="wood-row-head">' +
+        '<span class="wood-row-label">Wood <span class="wood-index"></span></span>' +
+        '<button type="button" class="wood-row-remove" title="Remove this wood entry">✕</button>' +
+      '</div>' +
+      '<div class="wood-row-grid">' +
+        '<div class="field"><label>Length (in)</label><input type="number" class="dim wr-l" min="0" step="any" placeholder="0" value="' + (data.l || '') + '"></div>' +
+        '<div class="field"><label>Width (in)</label><input type="number" class="dim wr-w" min="0" step="any" placeholder="0" value="' + (data.w || '') + '"></div>' +
+        '<div class="field"><label>Height (in)</label><input type="number" class="dim wr-h" min="0" step="any" placeholder="0" value="' + (data.h || '') + '"></div>' +
+        '<div class="field"><label>Pieces</label><input type="number" class="dim wr-pieces" min="0" step="1" placeholder="1" value="' + (data.pieces || '') + '"></div>' +
+        '<div class="field"><label>Rate (₹ / Cu.Ft.)</label><input type="number" class="rate wr-rate" min="0" step="any" placeholder="0" value="' + (data.rate || '') + '"></div>' +
+        '<div class="flow-out"><label>Per Piece</label><span class="qty wr-per-piece">0.0000 <small>cu.ft</small></span></div>' +
+        '<div class="flow-out"><label>Total Qty</label><span class="qty wr-total-qty">0.0000 <small>cu.ft</small></span></div>' +
+        '<div class="flow-out cost"><label>Cost</label><span class="cost-val wr-cost">₹ 0.00</span></div>' +
+      '</div>'
+    );
+  }
+
+  function updateWoodEmptyState(){
+    var count = woodRowsContainer.querySelectorAll('.wood-row').length;
+    woodEmptyEl.style.display = count === 0 ? 'block' : 'none';
+  }
+
+  function renumberWoodRows(){
+    var rows = woodRowsContainer.querySelectorAll('.wood-row');
+    rows.forEach(function(row, idx){
+      var label = row.querySelector('.wood-index');
+      if(label) label.textContent = '#' + (idx + 1);
+    });
+  }
+
+  function addWoodRow(data, skipRecalc){
+    woodRowCounter++;
+    var row = document.createElement('div');
+    row.className = 'wood-row';
+    row.dataset.rowId = 'wood-row-' + woodRowCounter;
+    row.innerHTML = woodRowTemplate(data);
+    woodRowsContainer.appendChild(row);
+    renumberWoodRows();
+    updateWoodEmptyState();
+    if(!skipRecalc) recalcAndRender();
+    return row;
+  }
+
+  function clearAllWoodRows(){
+    woodRowsContainer.innerHTML = '';
+    updateWoodEmptyState();
+  }
+
+  function resetWoodToSingleEmptyRow(){
+    clearAllWoodRows();
+    addWoodRow(null, true);
+  }
+
+  woodRowsContainer.addEventListener('click', function(e){
+    var btn = e.target.closest('.wood-row-remove');
+    if(!btn) return;
+    var row = btn.closest('.wood-row');
+    if(row) row.remove();
+    renumberWoodRows();
+    updateWoodEmptyState();
+    recalcAndRender();
+  });
+
+  document.getElementById('add-wood-btn').addEventListener('click', function(){
+    addWoodRow();
+  });
+
+  function getWoodRowsData(){
+    var rows = woodRowsContainer.querySelectorAll('.wood-row');
+    var out = [];
+    rows.forEach(function(row){
+      out.push({
+        l: row.querySelector('.wr-l').value,
+        w: row.querySelector('.wr-w').value,
+        h: row.querySelector('.wr-h').value,
+        pieces: row.querySelector('.wr-pieces').value,
+        rate: row.querySelector('.wr-rate').value
+      });
+    });
+    return out;
+  }
+
+  /* ---------------- DYNAMIC FOAM ROWS ---------------- */
+
+  var foamRowsContainer = document.getElementById('foam-rows');
+  var foamEmptyEl = document.getElementById('foam-empty');
+
+  function foamRowTemplate(data){
+    data = data || {};
+    return (
+      '<div class="wood-row-head">' +
+        '<span class="wood-row-label">Foam <span class="wood-index"></span></span>' +
+        '<button type="button" class="wood-row-remove" title="Remove this foam entry">✕</button>' +
+      '</div>' +
+      '<div class="wood-row-grid">' +
+        '<div class="field"><label>Length (in)</label><input type="number" class="dim fr-l" min="0" step="any" placeholder="0" value="' + (data.l || '') + '"></div>' +
+        '<div class="field"><label>Width (in)</label><input type="number" class="dim fr-w" min="0" step="any" placeholder="0" value="' + (data.w || '') + '"></div>' +
+        '<div class="field"><label>Pieces</label><input type="number" class="dim fr-pieces" min="0" step="1" placeholder="1" value="' + (data.pieces || '') + '"></div>' +
+        '<div class="field"><label>Rate (₹ / Sq.Ft.)</label><input type="number" class="rate fr-rate" min="0" step="any" placeholder="0" value="' + (data.rate || '') + '"></div>' +
+        '<div class="flow-out"><label>Per Piece</label><span class="qty fr-per-piece">0.00 <small>sq.ft</small></span></div>' +
+        '<div class="flow-out"><label>Total Area</label><span class="qty fr-total-qty">0.00 <small>sq.ft</small></span></div>' +
+        '<div class="flow-out cost"><label>Cost</label><span class="cost-val fr-cost">₹ 0.00</span></div>' +
+      '</div>'
+    );
+  }
+
+  function updateFoamEmptyState(){
+    var count = foamRowsContainer.querySelectorAll('.wood-row').length;
+    foamEmptyEl.style.display = count === 0 ? 'block' : 'none';
+  }
+
+  function renumberFoamRows(){
+    foamRowsContainer.querySelectorAll('.wood-row').forEach(function(row, idx){
+      var label = row.querySelector('.wood-index');
+      if(label) label.textContent = '#' + (idx + 1);
+    });
+  }
+
+  function addFoamRow(data, skipRecalc){
+    var row = document.createElement('div');
+    row.className = 'wood-row';
+    row.innerHTML = foamRowTemplate(data);
+    foamRowsContainer.appendChild(row);
+    renumberFoamRows();
+    updateFoamEmptyState();
+    if(!skipRecalc) recalcAndRender();
+    return row;
+  }
+
+  function clearAllFoamRows(){
+    foamRowsContainer.innerHTML = '';
+    updateFoamEmptyState();
+  }
+
+  function resetFoamToSingleEmptyRow(){
+    clearAllFoamRows();
+    addFoamRow(null, true);
+  }
+
+  foamRowsContainer.addEventListener('click', function(e){
+    var btn = e.target.closest('.wood-row-remove');
+    if(!btn) return;
+    var row = btn.closest('.wood-row');
+    if(row) row.remove();
+    renumberFoamRows();
+    updateFoamEmptyState();
+    recalcAndRender();
+  });
+
+  document.getElementById('add-foam-btn').addEventListener('click', function(){
+    addFoamRow();
+  });
+
+  function getFoamRowsData(){
+    var out = [];
+    foamRowsContainer.querySelectorAll('.wood-row').forEach(function(row){
+      out.push({
+        l: row.querySelector('.fr-l').value,
+        w: row.querySelector('.fr-w').value,
+        pieces: row.querySelector('.fr-pieces').value,
+        rate: row.querySelector('.fr-rate').value
+      });
+    });
+    return out;
+  }
+
   /* ---------------- CALCULATIONS ---------------- */
 
   function calculateWood(){
-    var l = num('wood-l'), w = num('wood-w'), h = num('wood-h'), rate = num('wood-rate');
-    var cubicFeet = (l * w * h) / 1728;
-    var cost = cubicFeet * rate;
-    return { cubicFeet: cubicFeet, cost: cost };
+    var rows = woodRowsContainer.querySelectorAll('.wood-row');
+    var totalCubicFeet = 0;
+    var totalCost = 0;
+    rows.forEach(function(row){
+      var l = rowNum(row, '.wr-l');
+      var w = rowNum(row, '.wr-w');
+      var h = rowNum(row, '.wr-h');
+      var pieces = rowPieces(row, '.wr-pieces');
+      var rate = rowNum(row, '.wr-rate');
+      var perPiece = (l * w * h) / 1728;
+      var totalQty = perPiece * pieces;
+      var cost = totalQty * rate;
+      totalCubicFeet += totalQty;
+      totalCost += cost;
+      setRowText(row, '.wr-per-piece', formatQty(perPiece, 4) + ' \u00A0cu.ft');
+      setRowText(row, '.wr-total-qty', formatQty(totalQty, 4) + ' \u00A0cu.ft');
+      setRowText(row, '.wr-cost', formatCurrency(cost));
+    });
+    return { cubicFeet: totalCubicFeet, cost: totalCost };
   }
 
   function calculatePly(){
@@ -769,18 +1049,25 @@
     return { sqFeet: sqFeet, cost: cost };
   }
 
-  function calculateFoam1(){
-    var l = num('foam1-l'), w = num('foam1-w'), rate = num('foam1-rate');
-    var sqFeet = (l * w) / 144;
-    var cost = sqFeet * rate;
-    return { sqFeet: sqFeet, cost: cost };
-  }
-
-  function calculateFoam2(){
-    var l = num('foam2-l'), w = num('foam2-w'), rate = num('foam2-rate');
-    var sqFeet = (l * w) / 144;
-    var cost = sqFeet * rate;
-    return { sqFeet: sqFeet, cost: cost };
+  // Foam: every entry = (L x W) / 144 sq.ft per piece, x pieces, x rate. Entries are summed.
+  function calculateFoam(){
+    var totalSqFeet = 0;
+    var totalCost = 0;
+    foamRowsContainer.querySelectorAll('.wood-row').forEach(function(row){
+      var l = rowNum(row, '.fr-l');
+      var w = rowNum(row, '.fr-w');
+      var pieces = rowPieces(row, '.fr-pieces');
+      var rate = rowNum(row, '.fr-rate');
+      var perPiece = (l * w) / 144;
+      var totalQty = perPiece * pieces;
+      var cost = totalQty * rate;
+      totalSqFeet += totalQty;
+      totalCost += cost;
+      setRowText(row, '.fr-per-piece', formatQty(perPiece, 2) + ' \u00A0sq.ft');
+      setRowText(row, '.fr-total-qty', formatQty(totalQty, 2) + ' \u00A0sq.ft');
+      setRowText(row, '.fr-cost', formatCurrency(cost));
+    });
+    return { sqFeet: totalSqFeet, cost: totalCost };
   }
 
   function calculateKapda(){
@@ -805,10 +1092,10 @@
     return { total: total, goods: goods, labour: labour, other: other };
   }
 
-  function calculateGaadiTotal(foam1, foam2, kapda){
+  function calculateGaadiTotal(foam, kapda){
     var labour = num('gaadi-labour');
     var other = num('gaadi-other');
-    var total = foam1.cost + foam2.cost + kapda.cost + labour + other;
+    var total = foam.cost + kapda.cost + labour + other;
     return { total: total, labour: labour, other: other };
   }
 
@@ -828,16 +1115,14 @@
 
     var polish = calculatePolishTotal();
 
-    var foam1 = calculateFoam1();
-    var foam2 = calculateFoam2();
+    var foam = calculateFoam();
     var kapda = calculateKapda();
-    var gaadi = calculateGaadiTotal(foam1, foam2, kapda);
+    var gaadi = calculateGaadiTotal(foam, kapda);
 
     var grandTotal = calculateGrandTotal(frame.total, polish.total, gaadi.total);
 
     // Frame display
-    setText('wood-cf', formatQty(wood.cubicFeet, 4) + ' \u00A0cu.ft');
-    setText('wood-cost', formatCurrency(wood.cost));
+    setText('wood-subtotal', formatCurrency(wood.cost));
     setText('ply-sf', formatQty(ply.sqFeet, 2) + ' \u00A0sq.ft');
     setText('ply-cost', formatCurrency(ply.cost));
     setText('flexi-sf', formatQty(flexi.sqFeet, 2) + ' \u00A0sq.ft');
@@ -856,14 +1141,10 @@
     setText('polish-total', formatCurrency(polish.total));
 
     // Gaadi display
-    setText('foam1-sf', formatQty(foam1.sqFeet, 2) + ' \u00A0sq.ft');
-    setText('foam1-cost', formatCurrency(foam1.cost));
-    setText('foam2-sf', formatQty(foam2.sqFeet, 2) + ' \u00A0sq.ft');
-    setText('foam2-cost', formatCurrency(foam2.cost));
+    setText('foam-subtotal', formatCurrency(foam.cost));
     setText('kapda-sf', formatQty(kapda.sqFeet, 2) + ' \u00A0sq.ft');
     setText('kapda-cost', formatCurrency(kapda.cost));
-    setText('bd-foam1', formatCurrency(foam1.cost));
-    setText('bd-foam2', formatCurrency(foam2.cost));
+    setText('bd-foam', formatCurrency(foam.cost));
     setText('bd-kapda', formatCurrency(kapda.cost));
     setText('bd-gaadi-labour', formatCurrency(gaadi.labour));
     setText('bd-gaadi-other', formatCurrency(gaadi.other));
@@ -888,7 +1169,7 @@
     lastResult = {
       wood: wood, ply: ply, flexi: flexi, frame: frame,
       polish: polish,
-      foam1: foam1, foam2: foam2, kapda: kapda, gaadi: gaadi,
+      foam: foam, kapda: kapda, gaadi: gaadi,
       grandTotal: grandTotal
     };
   }
@@ -901,23 +1182,21 @@
     }
   });
 
+  // Fixed (non-wood) fields. Wood is handled separately as a dynamic list of rows.
   var ALL_FIELD_IDS = [
     'item-name','item-qty',
-    'wood-l','wood-w','wood-h','wood-rate',
     'ply-l','ply-w','ply-rate',
     'flexi-l','flexi-w','flexi-rate',
     'frame-labour','frame-other',
     'polish-goods','polish-labour','polish-other',
-    'foam1-l','foam1-w','foam1-rate',
-    'foam2-l','foam2-w','foam2-rate',
     'kapda-l','kapda-w','kapda-rate',
     'gaadi-labour','gaadi-other'
   ];
 
   var CATEGORY_FIELDS = {
-    frame: ['wood-l','wood-w','wood-h','wood-rate','ply-l','ply-w','ply-rate','flexi-l','flexi-w','flexi-rate','frame-labour','frame-other'],
+    frame: ['ply-l','ply-w','ply-rate','flexi-l','flexi-w','flexi-rate','frame-labour','frame-other'],
     polish: ['polish-goods','polish-labour','polish-other'],
-    gaadi: ['foam1-l','foam1-w','foam1-rate','foam2-l','foam2-w','foam2-rate','kapda-l','kapda-w','kapda-rate','gaadi-labour','gaadi-other']
+    gaadi: ['kapda-l','kapda-w','kapda-rate','gaadi-labour','gaadi-other']
   };
 
   document.querySelectorAll('[data-clear]').forEach(function(btn){
@@ -927,6 +1206,12 @@
         var el = document.getElementById(id);
         if(el) el.value = '';
       });
+      if(cat === 'frame'){
+        resetWoodToSingleEmptyRow();
+      }
+      if(cat === 'gaadi'){
+        resetFoamToSingleEmptyRow();
+      }
       recalcAndRender();
     });
   });
@@ -938,6 +1223,8 @@
       var el = document.getElementById(id);
       if(el) el.value = '';
     });
+    resetWoodToSingleEmptyRow();
+    resetFoamToSingleEmptyRow();
     recalcAndRender();
     setText('save-msg', '');
   });
@@ -952,6 +1239,8 @@
       var el = document.getElementById(id);
       data[id] = el ? el.value : '';
     });
+    data.__woodRows = getWoodRowsData();
+    data.__foamRows = getFoamRowsData();
     try{
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       setText('save-msg', 'Costing saved on this device.');
@@ -974,6 +1263,22 @@
           if(el) el.value = data[id];
         }
       });
+      clearAllWoodRows();
+      var woodRows = data.__woodRows;
+      if(Array.isArray(woodRows) && woodRows.length){
+        woodRows.forEach(function(rowData){
+          addWoodRow(rowData, true);
+        });
+      }else{
+        addWoodRow(null, true);
+      }
+      clearAllFoamRows();
+      var foamRows = data.__foamRows;
+      if(Array.isArray(foamRows) && foamRows.length){
+        foamRows.forEach(function(rowData){ addFoamRow(rowData, true); });
+      }else{
+        addFoamRow(null, true);
+      }
       recalcAndRender();
       setText('save-msg', 'Last saved costing loaded.');
     }catch(err){
@@ -1005,10 +1310,25 @@
     html += '<tr><td><strong>Quantity:</strong> ' + escapeHtml(qty) + '</td><td style="text-align:right;"><strong>Cost Per Item:</strong> ' + costPerItem + '</td></tr></table>';
 
     html += '<h2>Frame Costing</h2><table>';
-    html += row('Wood — Dimensions (in)', val('wood-l')+' x '+val('wood-w')+' x '+val('wood-h'));
-    html += row('Wood — Cubic Feet', formatQty(r.wood.cubicFeet,4));
-    html += row('Wood — Rate (₹/cu.ft)', val('wood-rate') || '0');
-    html += row('Wood — Cost', formatCurrency(r.wood.cost));
+    var woodRowsData = getWoodRowsData();
+    if(woodRowsData.length === 0){
+      html += row('Wood', 'Not Used');
+    }else{
+      woodRowsData.forEach(function(wr, idx){
+        var l = parseFloat(wr.l) || 0, w = parseFloat(wr.w) || 0, h = parseFloat(wr.h) || 0;
+        var pieces = (wr.pieces === '' || wr.pieces === null || isNaN(parseFloat(wr.pieces))) ? 1 : parseFloat(wr.pieces);
+        var rate = parseFloat(wr.rate) || 0;
+        var perPiece = (l * w * h) / 1728;
+        var totalQty = perPiece * pieces;
+        var cost = totalQty * rate;
+        var label = 'Wood #' + (idx + 1);
+        html += row(label + ' — Dimensions (in) x Pieces', l+' x '+w+' x '+h+' \u00D7 '+pieces+' pcs');
+        html += row(label + ' — Total Cubic Feet', formatQty(totalQty,4));
+        html += row(label + ' — Rate (₹/cu.ft)', rate);
+        html += row(label + ' — Cost', formatCurrency(cost));
+      });
+    }
+    html += row('Wood Subtotal', formatCurrency(r.wood.cost), true);
     html += row('12mm Ply — Dimensions (in)', val('ply-l')+' x '+val('ply-w'));
     html += row('12mm Ply — Area (sq.ft)', formatQty(r.ply.sqFeet,2));
     html += row('12mm Ply — Rate (₹/sq.ft)', val('ply-rate') || '0');
@@ -1030,16 +1350,21 @@
     html += '</table>';
 
     html += '<h2>Gaadi Work Costing</h2><table>';
-    var foam1Used = (parseFloat(val('foam1-l'))||0) > 0 || (parseFloat(val('foam1-w'))||0) > 0;
-    var foam2Used = (parseFloat(val('foam2-l'))||0) > 0 || (parseFloat(val('foam2-w'))||0) > 0;
-    html += row('Foam 1 — Dimensions (in)', foam1Used ? (val('foam1-l')+' x '+val('foam1-w')) : 'Not Used');
-    html += row('Foam 1 — Area (sq.ft)', formatQty(r.foam1.sqFeet,2));
-    html += row('Foam 1 — Rate (₹/sq.ft)', val('foam1-rate') || '0');
-    html += row('Foam 1 — Cost', formatCurrency(r.foam1.cost));
-    html += row('Foam 2 — Dimensions (in)', foam2Used ? (val('foam2-l')+' x '+val('foam2-w')) : 'Not Used');
-    html += row('Foam 2 — Area (sq.ft)', formatQty(r.foam2.sqFeet,2));
-    html += row('Foam 2 — Rate (₹/sq.ft)', val('foam2-rate') || '0');
-    html += row('Foam 2 — Cost', formatCurrency(r.foam2.cost));
+    var foamRowsData = getFoamRowsData();
+    var foamEls = foamRowsContainer.querySelectorAll('.wood-row');
+    if(foamRowsData.length === 0){
+      html += row('Foam', 'Not Used');
+    }else{
+      foamRowsData.forEach(function(fr, idx){
+        var el = foamEls[idx];
+        var n = idx + 1;
+        html += row('Foam ' + n + ' — Dimensions (in) × Pieces', (fr.l || '0') + ' x ' + (fr.w || '0') + '  ×  ' + (fr.pieces === '' ? '1' : fr.pieces) + ' pcs');
+        html += row('Foam ' + n + ' — Total Area (sq.ft)', el.querySelector('.fr-total-qty').textContent);
+        html += row('Foam ' + n + ' — Rate (₹/sq.ft)', fr.rate || '0');
+        html += row('Foam ' + n + ' — Cost', el.querySelector('.fr-cost').textContent);
+      });
+    }
+    html += row('Foam Subtotal', formatCurrency(r.foam.cost), true);
     html += row('Kapda — Dimensions (in)', val('kapda-l')+' x '+val('kapda-w'));
     html += row('Kapda — Area (sq.ft)', formatQty(r.kapda.sqFeet,2));
     html += row('Kapda — Rate (₹/sq.ft)', val('kapda-rate') || '0');
@@ -1073,6 +1398,8 @@
   /* ---------------- INIT ---------------- */
 
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
+  addWoodRow(null, true);
+  addFoamRow(null, true);
   recalcAndRender();
 
 })();

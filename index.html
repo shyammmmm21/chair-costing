@@ -339,6 +339,9 @@
     white-space:nowrap;
   }
 
+  .flow.kapda-flow{grid-template-columns:repeat(3,1fr);}
+  @media (max-width:820px){ .flow.kapda-flow{grid-template-columns:1fr;} }
+
   .simple-fields{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -688,15 +691,9 @@
 
     <div class="material-block">
       <h3>Kapda / Fabric</h3>
-      <div class="flow">
-        <div class="field"><label>Length (inch)</label><input type="number" class="dim" id="kapda-l" min="0" step="any" placeholder="0"></div>
-        <div class="field"><label>Width (inch)</label><input type="number" class="dim" id="kapda-w" min="0" step="any" placeholder="0"></div>
-        <div class="field" style="visibility:hidden"></div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-out"><label>Kapda Area</label><span class="qty" id="kapda-sf">0.00 <small>sq.ft</small></span></div>
-        <div class="flow-arrow">→</div>
-        <div class="field"><label>Kapda Rate (₹ / Sq.Ft.)</label><input type="number" class="rate" id="kapda-rate" min="0" step="any" placeholder="0"></div>
-        <div class="flow-arrow">→</div>
+      <div class="flow kapda-flow">
+        <div class="field"><label>Kapda (Metre)</label><input type="number" class="dim" id="kapda-m" min="0" step="any" placeholder="0"></div>
+        <div class="field"><label>Kapda Rate (₹ / Metre)</label><input type="number" class="rate" id="kapda-rate" min="0" step="any" placeholder="0"></div>
         <div class="flow-out cost"><label>Kapda Cost</label><span class="cost-val" id="kapda-cost">₹ 0.00</span></div>
       </div>
     </div>
@@ -726,7 +723,7 @@
       <div class="formula-item"><h5>Wood</h5><code>(L × W × H) ÷ 1728 = Cubic Feet</code></div>
       <div class="formula-item"><h5>Ply / Flexi Ply</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
       <div class="formula-item"><h5>Foam (each entry)</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
-      <div class="formula-item"><h5>Kapda</h5><code>(L × W) ÷ 144 = Square Feet</code></div>
+      <div class="formula-item"><h5>Kapda</h5><code>Metre × Rate per Metre = Cost</code></div>
       <div class="formula-item"><h5>Category Total</h5><code>Material Costs + Labour + Other</code></div>
       <div class="formula-item"><h5>Grand Total</h5><code>Frame + Polish + Gaadi Work</code></div>
     </div>
@@ -1071,10 +1068,10 @@
   }
 
   function calculateKapda(){
-    var l = num('kapda-l'), w = num('kapda-w'), rate = num('kapda-rate');
-    var sqFeet = (l * w) / 144;
-    var cost = sqFeet * rate;
-    return { sqFeet: sqFeet, cost: cost };
+    // Kapda cost = kapda (metre) x kapda rate (per metre)
+    var metres = num('kapda-m'), rate = num('kapda-rate');
+    var cost = metres * rate;
+    return { metres: metres, cost: cost };
   }
 
   function calculateFrameTotal(wood, ply, flexi){
@@ -1142,7 +1139,6 @@
 
     // Gaadi display
     setText('foam-subtotal', formatCurrency(foam.cost));
-    setText('kapda-sf', formatQty(kapda.sqFeet, 2) + ' \u00A0sq.ft');
     setText('kapda-cost', formatCurrency(kapda.cost));
     setText('bd-foam', formatCurrency(foam.cost));
     setText('bd-kapda', formatCurrency(kapda.cost));
@@ -1189,14 +1185,14 @@
     'flexi-l','flexi-w','flexi-rate',
     'frame-labour','frame-other',
     'polish-goods','polish-labour','polish-other',
-    'kapda-l','kapda-w','kapda-rate',
+    'kapda-m','kapda-rate',
     'gaadi-labour','gaadi-other'
   ];
 
   var CATEGORY_FIELDS = {
     frame: ['ply-l','ply-w','ply-rate','flexi-l','flexi-w','flexi-rate','frame-labour','frame-other'],
     polish: ['polish-goods','polish-labour','polish-other'],
-    gaadi: ['kapda-l','kapda-w','kapda-rate','gaadi-labour','gaadi-other']
+    gaadi: ['kapda-m','kapda-rate','gaadi-labour','gaadi-other']
   };
 
   document.querySelectorAll('[data-clear]').forEach(function(btn){
@@ -1365,9 +1361,8 @@
       });
     }
     html += row('Foam Subtotal', formatCurrency(r.foam.cost), true);
-    html += row('Kapda — Dimensions (in)', val('kapda-l')+' x '+val('kapda-w'));
-    html += row('Kapda — Area (sq.ft)', formatQty(r.kapda.sqFeet,2));
-    html += row('Kapda — Rate (₹/sq.ft)', val('kapda-rate') || '0');
+    html += row('Kapda — Length (metre)', val('kapda-m') || '0');
+    html += row('Kapda — Rate (₹/metre)', val('kapda-rate') || '0');
     html += row('Kapda — Cost', formatCurrency(r.kapda.cost));
     html += row('Labour', formatCurrency(r.gaadi.labour));
     html += row('Other', formatCurrency(r.gaadi.other));
